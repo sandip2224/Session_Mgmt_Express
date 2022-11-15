@@ -7,18 +7,18 @@ require('./config/db')
 
 const User = require('./models/User')
 
-
 const app = express()
 
 const {
     PORT = 3000,
     SSN_LIFETIME = 1000 * 60 * 60 * 2,
-    SSN_NAME = 'ssn_id',
+    SSN_NAME = 'SESSIONID',
     SSN_SECRET = 'default_secret',
     NODE_ENV = 'dev',
 } = process.env
 
 // Mounting middlewares
+
 app.use(express.urlencoded({ extended: true }))
 
 app.use(session({
@@ -50,4 +50,4 @@ app.use(async (req, res, next) => {
 app.use('/', require('./routes/auth.route'))
 app.use('/', require('./routes/user.route'))
 
-app.listen(3000 || process.env.PORT, console.log('Server running on port 3000!'))
+app.listen(PORT, console.log('Server running on port 3000!'))

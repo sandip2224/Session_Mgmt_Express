@@ -9,11 +9,12 @@ const User = require('../models/User')
 
 router.get('/', (req, res) => {
     const { userId } = req.session
+    const { user } = res.locals
     res.send(`
         <h1>Welcome!</h1>
         ${userId
             ?
-            `<a href='/dashboard'>Go to dashboard</a>
+            `<a href='/dashboard'>Go to dashboard ${user.uname}</a>
             <form method='post' action='/logout'>
                 <button>Logout</button>
             </form>`
