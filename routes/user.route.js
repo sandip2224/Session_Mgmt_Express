@@ -24,15 +24,14 @@ router.get('/', (req, res) => {
     `)
 })
 
-router.get('/dashboard', redirectLogin, (req, res) => {
+router.get('/dashboard', redirectLogin, async (req, res) => {
     const { user } = res.locals
-    // const user = users.find(user => user.id === req.session.userId)
 
     res.send(`
         <h1>User Dashboard!</h1>
         <a href='/'>Home</a>
         <ul>
-            <li>Name: ${user.name}</li>
+            <li>Username: ${user.uname}</li>
             <li>Email: ${user.email}</li>
         </ul>
         <form method='post' action='/logout'>

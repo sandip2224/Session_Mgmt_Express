@@ -1,58 +1,65 @@
 const express = require('express')
-const { where } = require('sequelize')
+const { Op } = require('sequelize')
+const { uuid } = require('uuidv4');
 const router = express.Router()
 
 const { redirectLogin, redirectDashboard } = require('../middlewares/middleware')
 
 const User = require('../models/User')
 
-router.post('/register', (req, res) => {
-    const { name, email, password } = req.body
+router.post('/register', async (req, res) => {
+    const { uname, email, password } = req.body
 
-    if (name && email && password) { // TODO: Validation
-        const exists = User.findOne({ where: {uname: name} }) users.some(user => user.name === name || user.email === email)
+    if (uname && email && password) { // TODO: Validation
+        const exists = await User.findOne({
+            where: {
+                [Op.or]: {
+                    uname: uname,
+                    email: email
+                }
+            }
+        })
 
         if (!exists) {
-            const newUser = {
-                id: users.length + 1,
-                name,
-                email,
-                password // TODO: Hashing
-            }
+            const newUser = await User.create({
+                uid: uuid(),
+                uname, email, password
+            })
 
-            users.push(newUser)
-            req.session.userId = newUser.id
+            req.session.userId = newUser.uid
+            console.log(req.session)
+
             return res.redirect('/dashboard')
         }
     }
 
-    res.redirect('/register') // Display errors using qs params (register?error=<>)
+    //     res.redirect('/register') // Display errors using qs params (register?error=<>)
 })
 
-router.post('/login', (req, res) => {
-    const { email, password } = req.body
+// router.post('/login', (req, res) => {
+//     const { email, password } = req.body
 
-    if (email && password) {
-        const user = users.find(user => user.email === email && user.password === password)
+//     if (email && password) {
+//         const user = users.find(user => user.email === email && user.password === password)
 
-        if (user) {
-            req.session.userId = user.id
-            return res.redirect('/dashboard')
-        }
-    }
+//         if (user) {
+//             req.session.userId = user.id
+//             return res.redirect('/dashboard')
+//         }
+//     }
 
-    res.redirect('/login')
-})
+//     res.redirect('/login')
+// })
 
-router.post('/logout', redirectLogin, (req, res) => {
-    req.session.destroy(err => {
-        if (err) {
-            return res.redirect('/home')
-        }
+// router.post('/logout', redirectLogin, (req, res) => {
+//     req.session.destroy(err => {
+//         if (err) {
+//             return res.redirect('/home')
+//         }
 
-        res.clearCookie(SSN_NAME)
-        res.redirect('/login')
-    })
-})
+//         res.clearCookie(SSN_NAME)
+//         res.redirect('/login')
+//     })
+// })
 
 module.exports = router

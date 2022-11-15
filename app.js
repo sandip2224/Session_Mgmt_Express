@@ -5,6 +5,9 @@ require('dotenv').config('./.env')
 
 require('./config/db')
 
+const User = require('./models/User')
+
+
 const app = express()
 
 const {
@@ -15,13 +18,6 @@ const {
     NODE_ENV = 'dev',
 } = process.env
 
-// TODO: DB
-const users = [
-    { id: 1, name: 'Alex', email: 'alex@gmail.com', password: 'secret' },
-    { id: 2, name: 'Max', email: 'max@gmail.com', password: 'secret' },
-    { id: 3, name: 'Hagard', email: 'hagard@gmail.com', password: 'secret' }
-]
-
 // Mounting middlewares
 app.use(express.urlencoded({ extended: true }))
 
@@ -31,20 +27,25 @@ app.use(session({
     saveUninitialized: false,
     secret: SSN_SECRET,
     cookie: {
-        maxAge: process.env.SSN_LIFETIME || TWO_HOURS,
+        maxAge: SSN_LIFETIME,
         sameSite: true,
         secure: (NODE_ENV === 'prod') ? true : false,
         httpOnly: true
     }
 }))
 
-// app.use((req, res, next) => {
-//     const { userId } = req.session
-//     if (userId) {
-//         res.locals.user = users.find(user => user.id === userId)
-//     }
-//     next()
-// })
+app.use(async (req, res, next) => {
+    const { userId } = req.session
+    if (userId) {
+        const user = await User.findOne({
+            where: {
+                uid: req.session.userId
+            }
+        })
+        res.locals.user = user
+    }
+    next()
+})
 
 app.use('/', require('./routes/auth.route'))
 app.use('/', require('./routes/user.route'))

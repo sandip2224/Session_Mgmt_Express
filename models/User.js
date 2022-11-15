@@ -1,9 +1,9 @@
 const Sequelize = require('sequelize')
 const db = require('../config/db')
 
-const User = db.define('user', {
+const User = db.define('User', {
     uid: {
-        type: Sequelize.UUIDV4,
+        type: Sequelize.UUID,
         primaryKey: true
     },
     uname: {
@@ -27,6 +27,8 @@ const User = db.define('user', {
 
 User.sync()
     .then(console.log('> [SUCCESS] User Table has been created!!'.green.underline))
-    .catch(err => console.log('> [ERROR] User Table creation failed!!'.red.underline))
+    .catch(err => {
+        console.log('> [ERROR] User Table creation failed!!'.red.underline)
+    })
 
 module.exports = User
