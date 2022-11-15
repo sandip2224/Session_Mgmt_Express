@@ -1,6 +1,6 @@
 const express = require('express')
 const { Op } = require('sequelize')
-const { uuid } = require('uuidv4');
+
 const router = express.Router()
 
 const { redirectLogin, redirectDashboard } = require('../middlewares/middleware')
@@ -22,7 +22,6 @@ router.post('/register', async (req, res) => {
 
         if (!exists) {
             const newUser = await User.create({
-                uid: uuid(),
                 uname, email, password
             })
 

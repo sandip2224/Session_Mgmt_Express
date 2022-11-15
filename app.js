@@ -1,12 +1,19 @@
 const express = require('express')
-const session = require('express-session')
 const colors = require('colors')
 require('dotenv').config('./.env')
+const session = require('express-session')
+const redis = require('redis')
+const RedisStore = require('connect-redis')(session)
 
+// Connect to MySQL Instance
 require('./config/db')
 
-const User = require('./models/User')
+const redisClient = redis.createClient({ host: 'localhost', port: 6379, legacyMode: true })
 
+// Connect to Redis local instance
+redisClient.connect().catch(console.error)
+
+const User = require('./models/User')
 const app = express()
 
 const {
@@ -17,7 +24,8 @@ const {
     NODE_ENV = 'dev',
 } = process.env
 
-// Mounting middlewares
+
+// # Mounting middlewares
 
 app.use(express.urlencoded({ extended: true }))
 
@@ -31,17 +39,14 @@ app.use(session({
         sameSite: true,
         secure: (NODE_ENV === 'prod') ? true : false,
         httpOnly: true
-    }
+    },
+    store: new RedisStore({ client: redisClient })
 }))
 
 app.use(async (req, res, next) => {
     const { userId } = req.session
     if (userId) {
-        const user = await User.findOne({
-            where: {
-                uid: req.session.userId
-            }
-        })
+        const user = await User.findOne({ where: { uid: userId } })
         res.locals.user = user
     }
     next()
